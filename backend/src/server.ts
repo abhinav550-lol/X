@@ -2,13 +2,12 @@ import express from 'express';
 import cors from 'cors'	
 import dotenv from 'dotenv'
 import { connectDB } from './config/mongoConnection';
+import errorMiddleware from './error/errorMiddleware';
 
-
-
-
-//Config
-const app = express();
+import tagClear from './tasks/tagClear';
+//Config & Jobs
 dotenv.config();
+const app = express();
 
 app.use(cors({
 	origin : process.env.FRONTEND_URL, 
@@ -16,11 +15,15 @@ app.use(cors({
 	credentials : true,
 }))
 
-//Routes
-app.get('/' , (req, res) => {
-	res.send("HEllo")
-})
+app.use(express.json());
+app.use(express.urlencoded({extended : true}));
 
+tagClear.start();
+//Routes
+
+
+//Error Middleware
+app.use(errorMiddleware);
 
 //Server Start
 const startServer = async () => {

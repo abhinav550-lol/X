@@ -1,15 +1,21 @@
 import {model, Schema } from 'mongoose'
 
+
 interface userInterface{
 	name : string,
 	userHandle : string,
-	profilePic : string,
-	following : number,
-	followers : number,
+	profilePic? : string,
+	following : Schema.Types.ObjectId[],
+	followers :  Schema.Types.ObjectId[],
 	registerDate : Date,
-	//tweets media replies linked   	
+	auth : {
+		signInType :string,
+		sessionInfo : {
+			password : string
+		}
+	}	
 }
-
+``
 const userSchema = new Schema<userInterface>({
 	name : {
 		type : String,
@@ -25,13 +31,32 @@ const userSchema = new Schema<userInterface>({
 		type : String,
 	},
 	following : {
-		type: Number, 
-		default : 0,
+		type:  [Schema.Types.ObjectId], 
+		ref : 'User'
 	},
 	followers : {
-		type : Number, 
-		default : 0,
+		type :  [Schema.Types.ObjectId], 
+		ref : 'User'
 	},
+	auth : {
+		select : false,
+		signInType : {
+			type : String,
+			enum : ["Google" , "Session"]
+		},
+		sessionInfo : {
+			password : {
+				type : String,
+				required : [function(this : any){
+					return this.auth.signInType === "Session"; 
+				} , "Please enter a password."],
+			}
+		}
+	},
+	registerDate:{
+		type : Date,
+		default: Date.now
+	}
 })
 
 export default model<userInterface>('User' , userSchema);
