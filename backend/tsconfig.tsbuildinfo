@@ -1,1 +1,1 @@
-{"root":["./src/index.ts"],"version":"5.7.3"}
+{"root":["./src/server.ts","./src/config/mongoconnection.ts","./src/config/passport.ts","./src/error/apperror.ts","./src/error/errormiddleware.ts","./src/error/wrapasyncerrors.ts","./src/model/commentschema.ts","./src/model/mediaschema.ts","./src/model/notificationschema.ts","./src/model/tagschema.ts","./src/model/tweetschema.ts","./src/model/userschema.ts","./src/routes/authrouter.ts","./src/tasks/tagclear.ts","./src/utils/statuscodes.ts","./src/utils/utils.ts"],"version":"5.7.3"}

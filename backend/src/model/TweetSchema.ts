@@ -14,10 +14,6 @@ interface tweetInterface {
   }
 
 const tweetSchema = new Schema<tweetInterface>({
-	postedOn : {
-		type : Date,
-		default : Date.now,
-	},
 	postedBy : {
 		type : Schema.Types.ObjectId,
 		ref : 'User',
@@ -53,7 +49,7 @@ const tweetSchema = new Schema<tweetInterface>({
 			return this.tweetType === 'Retweet' 
 		}, "Please provide the tweet id to retweet."]
 	}
-});
+}, {timestamps : true});
 
 
 tweetSchema.pre('validate', function (next) {

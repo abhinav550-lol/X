@@ -1,14 +1,11 @@
 import {Schema , model } from 'mongoose'
-import statusCodes from '../utils/statusCodes';
-import AppError from '../error/AppError';
 
 interface CommentInterface{
 	tweetId : Schema.Types.ObjectId, // posted at 
-	repliedTo? : Schema.Types.ObjectId, // replied to
+	repliedTo : Schema.Types.ObjectId, // replied to
 	userId : Schema.Types.ObjectId, // posted by 
 	likes : number,
 	text : string,
-	isReply : boolean
 };
 
 
@@ -25,7 +22,8 @@ const commentSchema = new Schema<CommentInterface>({
 	},
 	repliedTo : {
 		type : Schema.Types.ObjectId,
-		ref : 'User'
+		ref : 'User',
+		required :  [true, "Please enter the user id that is being replied to."]	
 	},
 	likes : {
 		type : Number,
@@ -36,17 +34,6 @@ const commentSchema = new Schema<CommentInterface>({
 		required : [true , "Please enter the comment text."], 
 		max: [300, "The comment must not exceed 300 charecters."]
 	},
-	isReply : {
-		type : Boolean,
-		default : false
-	}
-});
-
-commentSchema.pre('validate', function (next){
-	if(this.isReply && !this.repliedTo){
-		return next(new AppError(statusCodes.BAD_REQUEST , 'Please add the reply target user.'));
-	}
-	next();
-})
+}, {timestamps : true});
 
 export default model<CommentInterface>('Comment' , commentSchema);

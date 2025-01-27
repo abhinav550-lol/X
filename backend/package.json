@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build server.js",
-    "prestart": "rimraf dist",
+    "build": "tsc --build ",
+    "rebuild": "rimraf dist",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts"
   },
@@ -13,15 +13,20 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/express-fileupload": "^1.5.1",
+    "@types/express-session": "^1.18.1",
     "@types/node-cron": "^3.0.11",
+    "@types/passport-google-oauth2": "^0.1.10",
     "backend": "file:",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "express-fileupload": "^1.5.1",
     "express-session": "^1.18.1",
     "mongoose": "^8.9.5",
     "node-cron": "^3.0.3",
     "passport": "^0.7.0",
-    "passport-google-oauth2": "^0.2.0"
+    "passport-google-oauth2": "^0.2.0",
+    "passport-google-oidc": "^0.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
