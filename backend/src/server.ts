@@ -10,6 +10,7 @@ import session from 'express-session'
 import tagClear from './tasks/tagClear';
 import authRoutes from './routes/authRouter'
 
+
 //Config & Jobs
 import './config/passport'
 const app = express();
@@ -26,6 +27,13 @@ app.use(session({
 	saveUninitialized: false,  
 	
 }));
+
+import "express-session";
+declare module "express-session" {
+  interface SessionData {
+    user: string;
+  }
+}
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -44,7 +52,7 @@ app.use(errorMiddleware);
 //Server Start
 const startServer = async () => {
 	try {
-	  const mongoUri = process.env.MONGO_URI;
+		const mongoUri = process.env.MONGO_URI;
 	  if (!mongoUri) {
 		throw new Error("MONGO_URI is not defined in the .env file");
 	  }

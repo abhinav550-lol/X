@@ -1,66 +1,21 @@
 import { model, Schema, Document, Types } from "mongoose";
 
-interface Auth {
-  signInType: "Google" | "Session";
-  sessionInfo?: {
-    password: string;
-  };
-  googleInfo?: {
-    googleId: string;
-  };
-}
-
 interface UserInterface extends Document {
   name: string;
   userHandle: string;
   profilePic?: string;
   following: Types.ObjectId[];
   followers: Types.ObjectId[];
-  auth: Auth;
+  auth: {
+    signInType: "Google" | "Session";
+    sessionInfo?: {
+      password: string;
+    };
+    googleInfo?: {
+      googleId: string;
+    };
+  };
 }
-
-const SessionInfoSchema = new Schema(
-  {
-    password: {
-      type: String,
-      required: [true, "Please enter a password."],
-    },
-  },
-  { _id: false }
-);
-
-const GoogleInfoSchema = new Schema(
-  {
-    googleId: {
-      type: String,
-      required: [true, "Please enter a Google ID."],
-    },
-  },
-  { _id: false }
-);
-
-const AuthSchema = new Schema(
-  {
-    signInType: {
-      type: String,
-      enum: ["Google", "Session"],
-      required: true,
-    },
-    sessionInfo: {
-      type: SessionInfoSchema,
-      required: function (this: any) {
-        return this.signInType === "Session";
-      },
-    },
-    googleInfo: {
-      type: GoogleInfoSchema,
-      required: function (this: any) {
-        return this.signInType === "Google";
-      },
-    },
-  },
-  { _id: false }
-);
 
 const userSchema = new Schema<UserInterface>(
   {
@@ -90,9 +45,27 @@ const userSchema = new Schema<UserInterface>(
       },
     ],
     auth: {
-      type: AuthSchema,
-      required: true,
-      select: true,
+      signInType: {
+        type: String,
+        enum: ["Google", "Session"],
+        required: true,
+      },
+      sessionInfo: {
+        password: {
+          type: String,
+          required: function (this: any) {
+            return this.signInType === "Session";
+          },
+        },
+      },
+      googleInfo: {
+        googleId: {
+          type: String,
+          required: function (this: any) {
+            return this.signInType === "Google";
+          },
+        },
+      },
     },
   },
   { timestamps: true }

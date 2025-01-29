@@ -1,6 +1,3 @@
-import { NextFunction, Request, Response } from "express";
-import statusCodes from "./statusCodes";
-
 export function userHandleGenerater(name : string) : string{ 
 	let salt : string = "";
 	for(let i = 0 ; i < 7 ; i++){
@@ -10,13 +7,3 @@ export function userHandleGenerater(name : string) : string{
 	return` ${name}-${salt}`
 }
 
-export function isLoggedIn(req: Request, res: Response, next: NextFunction){
-	if (req.user || req.session.user) {
-		next();
-	} else {
-		  res.status(statusCodes.UNAUTHORIZED ).json({
-			  success : false,
-			  message : "You are not logged in."
-		  })
-	  }
-};
