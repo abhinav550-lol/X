@@ -1,11 +1,17 @@
 import { model, Schema, Document, Types } from "mongoose";
+import AppError from "../error/AppError";
+import statusCodes from "../utils/statusCodes";
 
-interface UserInterface extends Document {
+export interface UserInterface extends Document {
+	_id : Types.ObjectId,	
   name: string;
   userHandle: string;
   profilePic?: string;
   following: Types.ObjectId[];
   followers: Types.ObjectId[];
+  bio?: string,
+  location? : string,
+  bannerPic? : string,
   auth: {
     signInType: "Google" | "Session";
     sessionInfo?: {
@@ -14,7 +20,11 @@ interface UserInterface extends Document {
     googleInfo?: {
       googleId: string;
     };
-  };
+  },
+  addFollower(userId : Types.ObjectId) : Promise<void>;
+  addFollowing(userId : Types.ObjectId) : Promise<void>;
+  removeFollower(userId : Types.ObjectId) : Promise<void>;
+  removeFollowee(userId : Types.ObjectId) : Promise<void>;
 }
 
 const userSchema = new Schema<UserInterface>(
@@ -32,18 +42,25 @@ const userSchema = new Schema<UserInterface>(
     profilePic: {
       type: String,
     },
-    following: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    followers: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    following: {
+		type : [Schema.Types.ObjectId],
+		ref : "User",
+		default : []
+	},
+    followers: {
+		type : [Schema.Types.ObjectId],
+		ref : "User",
+		default : []
+	},
+	bio : {
+		type : String,
+	},
+	bannerPic : {
+		type : String,
+	},
+	location : {
+		type : String,
+	},
     auth: {
       signInType: {
         type: String,
@@ -71,4 +88,27 @@ const userSchema = new Schema<UserInterface>(
   { timestamps: true }
 );
 
-export default model<UserInterface>("User", userSchema);
+userSchema.methods.addFollower = async function(userId : Types.ObjectId){
+	this.followers.push(userId);
+	await this.save();
+}
+
+userSchema.methods.addFollowing = async function(userId : Types.ObjectId){
+	this.following.push(userId);
+	await this.save();
+}
+
+userSchema.methods.removeFollowee = async function (userId: Types.ObjectId): Promise<void> {
+  this.following = this.following.filter((currId: Types.ObjectId) => !currId.equals(userId));
+  await this.save();
+};
+
+
+userSchema.methods.removeFollower = async function(userId : Types.ObjectId){
+	this.followers = this.followers.filter((currId: Types.ObjectId) => !currId.equals(userId));
+	await this.save();
+}
+
+const userModel =  model<UserInterface>("User", userSchema);
+
+export default userModel;

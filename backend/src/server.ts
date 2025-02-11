@@ -8,7 +8,10 @@ import { connectDB } from './config/mongoConnection';
 import errorMiddleware from './error/errorMiddleware';
 import session from 'express-session'
 import tagClear from './tasks/tagClear';
+
 import authRoutes from './routes/authRouter'
+import userRoutes from './routes/userRoutes'
+import tweetRoutes from './routes/tweetRoutes'
 
 
 //Config & Jobs
@@ -29,6 +32,7 @@ app.use(session({
 }));
 
 import "express-session";
+import fileUpload from 'express-fileupload';
 declare module "express-session" {
   interface SessionData {
     user: string;
@@ -41,10 +45,16 @@ app.use(passport.session());
 app.use(express.json());
 app.use(express.urlencoded({extended : true}));
 
+app.use(fileUpload({
+	createParentPath : true,
+}));
+
 tagClear.start();
 //Routes
 
 app.use('/auth' , authRoutes);
+app.use('/user' , userRoutes);
+app.use('/tweet' , tweetRoutes);
 
 //Error Middleware
 app.use(errorMiddleware);

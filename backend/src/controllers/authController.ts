@@ -4,13 +4,14 @@ import wrapAsyncErrors from "../error/wrapAsyncErrors";
 import AppError from "../error/AppError";
 import User from "../model/UserSchema";
 import bcrypt from 'bcrypt'
+import { createUserFolder } from "../utils/fileHandling";
 
 export function logoutUser (req: Request , res : Response , next : NextFunction) {
 	req.session.destroy((err) => {
 		next(err)
 	});
 
-	res.send(statusCodes.OK).json({
+	res.status(statusCodes.OK).json({
 		success: true,
 		message: "User logged out successfully."
 	})
@@ -49,7 +50,7 @@ export const registerUser = wrapAsyncErrors(async (req: Request, res: Response, 
 	const { name, userHandle, password, confirmPassword } = req.body;
   
 	if (!name || !userHandle || !password || !confirmPassword) {
-		return next(new AppError(statusCodes.BAD_REQUEST , `Please enter all the required fields. ${name} ${userHandle} ${password}`));
+		return next(new AppError(statusCodes.BAD_REQUEST , `Please enter all the required fields.`));
 	}
 
 	if(password !== confirmPassword){
@@ -76,8 +77,9 @@ export const registerUser = wrapAsyncErrors(async (req: Request, res: Response, 
 	})
 
 	//make user directory in store when they login ?
+	createUserFolder(newUser._id.toString());
 
-	req.session.user = newUser._id as string;
+	req.session.user = newUser._id.toString();
 
 	return res.status(statusCodes.OK).json({
 		success : true,
@@ -103,7 +105,7 @@ export const loginUser = wrapAsyncErrors(async (req : Request , res: Response , 
 		return next(new AppError(statusCodes.BAD_REQUEST , "Invalid Userhandle or Password."));
 	}
 
-	req.session.user = foundUser._id as string;
+	req.session.user = foundUser._id.toString();
 
 	return res.status(statusCodes.OK).json({
 		success : true,

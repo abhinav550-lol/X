@@ -1,6 +1,7 @@
-import {Schema , model } from 'mongoose'
+import {Schema , Types, model } from 'mongoose'
 
 interface CommentInterface{
+	 _id : Types.ObjectId,	
 	tweetId : Schema.Types.ObjectId, // posted at 
 	repliedTo : Schema.Types.ObjectId, // replied to
 	userId : Schema.Types.ObjectId, // posted by 

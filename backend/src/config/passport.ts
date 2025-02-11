@@ -1,7 +1,8 @@
 import passport from "passport";
 import passportGoogle from "passport-google-oauth2";
-import User from "../model/UserSchema";
+import User, { UserInterface } from "../model/UserSchema";
 import {userHandleGenerater} from "../utils/utils";
+import { createUserFolder, uploadFile } from "../utils/fileHandling";
 const GoogleStrategy = passportGoogle.Strategy;
 
 
@@ -30,9 +31,11 @@ passport.use(
 				  }	
 				}
 
+				
+
 				const newUser = {
 					name : profile.displayName, 
-					userHandle : userHandle,	
+					userHandle : userHandle,
 					auth : {
 						signInType : "Google",
 						googleInfo : {
@@ -41,9 +44,16 @@ passport.use(
 					}
 				}
 
+
 				user = await User.create(newUser);
+				user.profilePic =  profile.picture;
+				await user.save();
+
+				createUserFolder(user._id.toString());
 			}	
-			return done(null , user._id);
+
+
+			return done(null , user._id.toString());
 		}catch(e){
 			return done(e , null);
 		}
@@ -52,14 +62,15 @@ passport.use(
 );
 
 
-passport.serializeUser((user : any , done) => {
-	done(null , user._id);
+passport.serializeUser((user , done) => {
+	done(null , user);
 });
 
 passport.deserializeUser(async (id , done) => {
 	try {
 		const user = await User.findById(id)
-		return done(null , user?._id as string);
+		if(!user) return done(null , null);
+		return done(null , user?._id);
 	}catch(e){
 		return done(e, null);
 	}

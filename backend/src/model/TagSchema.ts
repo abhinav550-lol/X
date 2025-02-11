@@ -1,6 +1,7 @@
-import {model , Schema } from 'mongoose'
+import {model , Schema, Types } from 'mongoose'
 
 interface tagInterface{
+	 _id : Types.ObjectId,	
 	keyword : string,
 	frequency? : number,
 };
@@ -8,7 +9,7 @@ interface tagInterface{
 const tagSchema = new Schema<tagInterface>({
 	keyword : {
 		type : String,
-		required : [true, "A hash keyword is required."] ,
+		required : [true, "A tag keyword is required."] ,
 	},
 	frequency : {
 		type : Number,
@@ -27,4 +28,6 @@ tagSchema.statics.createOrUpdateTag = async function(key : string) : Promise<voi
 	}
 }
 
-export default  model<tagInterface>('Tag' , tagSchema);
+const tagModel =  model<tagInterface>('Tag' , tagSchema);
+
+export default tagModel;

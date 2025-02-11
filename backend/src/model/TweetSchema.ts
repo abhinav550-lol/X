@@ -1,8 +1,9 @@
-import {Schema , model} from 'mongoose'
+import {Schema , Types, model} from 'mongoose'
 import AppError from '../error/AppError';
 import statusCodes from '../utils/statusCodes';
 
 interface tweetInterface {
+	 _id : Types.ObjectId,	
 	postedOn: Date;
 	text?: string;
 	postedBy: Schema.Types.ObjectId;

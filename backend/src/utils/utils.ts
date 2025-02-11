@@ -7,3 +7,4 @@ export function userHandleGenerater(name : string) : string{
 	return` ${name}-${salt}`
 }
 
+

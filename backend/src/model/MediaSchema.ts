@@ -1,6 +1,7 @@
-import {model , Schema} from 'mongoose'
+import {model , Schema, Types} from 'mongoose'
 
 interface MediaInterface{
+	 _id : Types.ObjectId,	
 	mediaAddress : string,
 	userId : Schema.Types.ObjectId,
 	tweetId : Schema.Types.ObjectId,

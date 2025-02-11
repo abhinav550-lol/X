@@ -1,7 +1,8 @@
-import {model , Schema} from 'mongoose'
+import {model , Schema, Types} from 'mongoose'
 
 // likes , retweeted , commented , posted
 interface NotificationInterface{
+	 _id : Types.ObjectId,	
 	senderId : Schema.Types.ObjectId,
 	receiverId : Schema.Types.ObjectId,
 	for : string,
