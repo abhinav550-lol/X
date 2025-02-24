@@ -1,6 +1,7 @@
 import express from 'express';
 import {editUser , fetchForYou, followUser , unfollowUser , getUserProfile , getFollowers , getFollowing} from '../controllers/userController'
 import { isLoggedIn } from '../controllers/authController';
+import { getAllMedia } from '../controllers/mediaController';
 const router = express.Router();
 
 
@@ -22,6 +23,11 @@ router.get('/followers/:id' , isLoggedIn , getFollowers);
 router.get('/following/:id' , isLoggedIn , getFollowing);
 
 //fetch 'for you' algo
-router.get('/for-you' , isLoggedIn ,fetchForYou); 
+router.get('/for-you/:id' , isLoggedIn ,fetchForYou); 
 
+//all media 
+router.get('/media/:id' , isLoggedIn ,getAllMedia); 
+
+//get follow suggestions 
+router.get('/follow-suggestions/:id')
 export default router;

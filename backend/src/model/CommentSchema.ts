@@ -1,12 +1,13 @@
 import {Schema , Types, model } from 'mongoose'
 
-interface CommentInterface{
+export interface CommentInterface{
 	 _id : Types.ObjectId,	
 	tweetId : Schema.Types.ObjectId, // posted at 
-	repliedTo : Schema.Types.ObjectId, // replied to
-	userId : Schema.Types.ObjectId, // posted by 
-	likes : number,
+	repliedTo? : Schema.Types.ObjectId, // replied to
+	postedBy : Schema.Types.ObjectId, // posted by
 	text : string,
+	createdOn : Number,
+	isDeleted : Boolean,
 };
 
 
@@ -14,9 +15,9 @@ const commentSchema = new Schema<CommentInterface>({
 	tweetId : {
 		type : Schema.Types.ObjectId,
 		ref : 'Tweet',
-		required: [true, "Please give the tweet id to add comment."],
+		required: [true , "Please give the tweet id to add comment."],
 	},
-	userId : {
+	postedBy : {
 		type : Schema.Types.ObjectId,
 		ref : 'User',
 		required : [true, "Please enter the user id."]	
@@ -24,17 +25,23 @@ const commentSchema = new Schema<CommentInterface>({
 	repliedTo : {
 		type : Schema.Types.ObjectId,
 		ref : 'User',
-		required :  [true, "Please enter the user id that is being replied to."]	
-	},
-	likes : {
-		type : Number,
-		default : 0,
 	},
 	text : {
 		type : String,
-		required : [true , "Please enter the comment text."], 
+		required : [function(this){
+			return (
+			!this.isDeleted)
+		} , "Please enter the comment text."], 
 		max: [300, "The comment must not exceed 300 charecters."]
 	},
-}, {timestamps : true});
+	createdOn : {
+		type : Number,
+		default :Date.now()
+	},
+	isDeleted : {
+		type : Boolean,
+		default : false
+	}
+});
 
 export default model<CommentInterface>('Comment' , commentSchema);

@@ -6,6 +6,7 @@ export default function errorMiddleware(err: AppError, req: Request, res: Respon
 
   if (name === "ValidationError") {
     message = "Mongoose Validation Failed";
+	console.log(err)
     status = 400; 
   }
 

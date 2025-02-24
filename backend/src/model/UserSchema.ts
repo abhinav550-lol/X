@@ -1,4 +1,4 @@
-import { model, Schema, Document, Types } from "mongoose";
+import { model, Schema, Document, Types, Model } from "mongoose";
 import AppError from "../error/AppError";
 import statusCodes from "../utils/statusCodes";
 
@@ -12,6 +12,7 @@ export interface UserInterface extends Document {
   bio?: string,
   location? : string,
   bannerPic? : string,
+  likedTweets : Types.ObjectId[],
   auth: {
     signInType: "Google" | "Session";
     sessionInfo?: {
@@ -21,11 +22,16 @@ export interface UserInterface extends Document {
       googleId: string;
     };
   },
+  createdOn : Number,
   addFollower(userId : Types.ObjectId) : Promise<void>;
   addFollowing(userId : Types.ObjectId) : Promise<void>;
   removeFollower(userId : Types.ObjectId) : Promise<void>;
   removeFollowee(userId : Types.ObjectId) : Promise<void>;
 }
+
+interface UserModel extends Model<UserInterface> {
+	findByUserHandle(userHandle: string): Promise<UserInterface | null>;
+  }
 
 const userSchema = new Schema<UserInterface>(
   {
@@ -61,6 +67,11 @@ const userSchema = new Schema<UserInterface>(
 	location : {
 		type : String,
 	},
+	likedTweets : {
+		type : [Schema.Types.ObjectId],
+		ref : 'Tweet',
+		default : []
+	},
     auth: {
       signInType: {
         type: String,
@@ -84,9 +95,16 @@ const userSchema = new Schema<UserInterface>(
         },
       },
     },
-  },
-  { timestamps: true }
+	createdOn : {
+		type : Number,
+		default : Date.now()
+	}
+  }
 );
+
+userSchema.statics.findByUserHandle = async function(userHandle : string) : Promise<UserInterface | null>{
+	return this.findOne({userHandle});
+}
 
 userSchema.methods.addFollower = async function(userId : Types.ObjectId){
 	this.followers.push(userId);
@@ -109,6 +127,6 @@ userSchema.methods.removeFollower = async function(userId : Types.ObjectId){
 	await this.save();
 }
 
-const userModel =  model<UserInterface>("User", userSchema);
+const userModel =  model<UserInterface , UserModel>("User", userSchema);
 
 export default userModel;

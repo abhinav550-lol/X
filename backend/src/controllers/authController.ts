@@ -113,7 +113,6 @@ export const loginUser = wrapAsyncErrors(async (req : Request , res: Response , 
 	})
 })
 
-//Protect Routes Against LoggedIn Users and Logged out Users
 export const alreadyLoggedIn = wrapAsyncErrors(async(req: Request , res: Response ,next : NextFunction) => {
 	const user = req.user || req.session.user;
 	if(!user){

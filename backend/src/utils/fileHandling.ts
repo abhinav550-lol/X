@@ -24,9 +24,10 @@ export const uploadSingleFile = (file : UploadedFile , userFolder : string) =>{
 	return uploadPath;
 }	
 
-export const uploadFile = (files : UploadedFile | FileArray , id : string ) : string[] | string => {
+export const uploadFile = (files : UploadedFile | FileArray | UploadedFile[] , id : string ) : string[] | string => {
 	const userFolder : string = path.join(baseFolder ,id);
-
+	console.log(1);
+	
 	if('name' in files){
 		//Single Files
 		return uploadSingleFile(files as UploadedFile , userFolder);

@@ -1,16 +1,16 @@
 import {model , Schema, Types} from 'mongoose'
 
-interface MediaInterface{
+export interface MediaInterface{
 	 _id : Types.ObjectId,	
-	mediaAddress : string,
+	mediaAddress : string[],
 	userId : Schema.Types.ObjectId,
 	tweetId : Schema.Types.ObjectId,
-	type : string,
+	createdOn : Number,
 };
 
 const mediaSchema = new Schema<MediaInterface>({
 	mediaAddress : {
-		type : String,
+		type : [String],
 		required : [true, 'Please provide a valid address for the media.']
 	},
 	userId : {
@@ -23,12 +23,11 @@ const mediaSchema = new Schema<MediaInterface>({
 		ref : 'Tweet',
 		required : true,
 	},
-	type : {
-		type : String,
-		enum : ['Video' , 'Image' ],
-		required : [true, 'Please provide media type.']
+	createdOn : {
+		type : Number,
+		default :Date.now()
 	}
-}, {timestamps : true});
+});
 
 mediaSchema.index({ userId: 1 });
 mediaSchema.index({ tweetId: 1 });

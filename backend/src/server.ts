@@ -7,12 +7,12 @@ import cors from 'cors'
 import { connectDB } from './config/mongoConnection';
 import errorMiddleware from './error/errorMiddleware';
 import session from 'express-session'
-import tagClear from './tasks/tagClear';
 
 import authRoutes from './routes/authRouter'
 import userRoutes from './routes/userRoutes'
 import tweetRoutes from './routes/tweetRoutes'
-
+import commentRoutes from './routes/commentRoutes'
+import notificationRoutes from './routes/notificationRoutes'
 
 //Config & Jobs
 import './config/passport'
@@ -49,12 +49,13 @@ app.use(fileUpload({
 	createParentPath : true,
 }));
 
-tagClear.start();
 //Routes
 
 app.use('/auth' , authRoutes);
 app.use('/user' , userRoutes);
 app.use('/tweet' , tweetRoutes);
+app.use('/comment' , commentRoutes);
+app.use('/notification' , notificationRoutes);
 
 //Error Middleware
 app.use(errorMiddleware);

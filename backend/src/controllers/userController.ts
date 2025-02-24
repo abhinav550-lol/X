@@ -5,18 +5,20 @@ import AppError from "../error/AppError";
 import statusCodes from "../utils/statusCodes";
 import { UploadedFile } from "express-fileupload";
 import { uploadFile } from "../utils/fileHandling";
+import Tweet from "../model/TweetSchema";
+import { Types } from "mongoose";
 
 export const getUserProfile = wrapAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id: userHandle } = req.params;
+    const { id: userId } = req.params;
 
-    const foundUser = User.findOne({ userHandle });
+	const foundUser = await User.findById(userId);
 
     if (!foundUser) {
       return next(
         new AppError(
           statusCodes.NOT_FOUND,
-          `User with ${userHandle} not found.`
+          `User with ${userId} not found.`
         )
       );
     }
@@ -31,22 +33,22 @@ export const getUserProfile = wrapAsyncErrors(
 
 export const editUser = wrapAsyncErrors(
 	async (req: Request, res: Response, next: NextFunction) => {
-	  const { id: userHandle } = req.params;
-  
-	  const foundUser = await User.findOne({ userHandle });
+		const { id: userId } = req.params;
+
+		const foundUser = await User.findById(userId);
   
 	  if (!foundUser) {
 		return next(
 		  new AppError(
 			statusCodes.NOT_FOUND,
-			`Cannot edit, User with handle ${userHandle} not found.`
+			`Cannot edit, User with handle ${userId} not found.`
 		  )
 		);
 	  }
+	  
+	  const loggedInUser = req.user || req.session.user;
   
-	  const userId = req.session.user || req.user;
-  
-	  if (foundUser._id.toString() !== userId) {
+	  if (foundUser._id.toString() !== loggedInUser) {
 		return next(
 		  new AppError(statusCodes.UNAUTHORIZED, "You cannot edit this profile.")
 		);
@@ -118,9 +120,9 @@ export const followUser = wrapAsyncErrors(
 );
 
 export const getFollowers = wrapAsyncErrors(async (req : Request , res : Response , next : NextFunction) => {
-	const {id : userHandle} = req.params;
+	const {id : userId} = req.params;
 
-	const foundUser = await User.findOne({userHandle});
+	const foundUser = await User.findById(userId);
 	if(!foundUser){
 		return next(new AppError(statusCodes.BAD_REQUEST , "User not found."))
 	}
@@ -137,11 +139,11 @@ export const getFollowers = wrapAsyncErrors(async (req : Request , res : Respons
 
 export const unfollowUser = wrapAsyncErrors(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const {id : followHandle} = req.params;
+		const {id : followeeId} = req.params;
 
 		const userId = req.user || req.session.user;
 
-		const followeeUser = await User.findOne({userHandle : followHandle}); // who is followed
+		const followeeUser = await User.findById(followeeId); // who is followed
 		const followerUser = await User.findById(userId); // who follows
 
 		if(!followeeUser || !followerUser){
@@ -163,9 +165,9 @@ export const unfollowUser = wrapAsyncErrors(
 );
 
 export const getFollowing = wrapAsyncErrors(async (req : Request , res : Response , next : NextFunction) => {
-	const {id : userHandle} = req.params;
+	const {id : userId} = req.params;
 
-	const foundUser = await User.findOne({userHandle});
+	const foundUser = await User.findById(userId);
 	if(!foundUser){
 		return next(new AppError(statusCodes.BAD_REQUEST , "User not found."))
 	}
@@ -180,8 +182,61 @@ export const getFollowing = wrapAsyncErrors(async (req : Request , res : Respons
 	})
 })
 
-export const fetchForYou = wrapAsyncErrors( // at last
+export const fetchForYou = wrapAsyncErrors( 
   async (req: Request, res: Response, next: NextFunction) => {
+	const {id : userId} = req.params;
 
+	const foundUser = await User.findById(userId);
+
+	if(!foundUser){
+		return next(new AppError(statusCodes.BAD_REQUEST , "User not found, (to fetch for you)."))
+	}
+
+	const foundTweets = await Tweet.find({$and : [
+		{createdOn : {$gte : Date.now() - 86400000}},
+		{postedBy : {$in : foundUser.following}}
+	]}).limit(25);
+
+	const remainingTweets = await Tweet.find({createdOn : {$gte : Date.now() - (86400000*7)}}).limit(25 - foundTweets.length);
+
+	const allTweets = foundTweets.concat(remainingTweets);
+
+	return res.status(statusCodes.OK).json({
+		success : true,
+		message : "For you fetched.",
+		forYouTweets : allTweets 
+	})
   }
 );
+
+
+export const fetchFollowSuggestions = wrapAsyncErrors(async(req :Request , res : Response , next : NextFunction) => {
+	const {id : userId} = req.params;;
+	const foundUserFollowing = await User.findById(userId).select('following').populate('following').lean(); //following 
+
+	let suggestions : UserInterface[] = [];
+	if(!foundUserFollowing){
+		const randomSuggestions = await User.aggregate([{$sample : {size : 5}}]);
+		suggestions = randomSuggestions;
+	}else{	
+		//to find following suggestion from the user following's following
+		//@ts-ignore
+		const possibleSuggestions = foundUserFollowing.following.flatMap((userFollowing)=> userFollowing.following);
+		console.log(possibleSuggestions);
+		let queryArray : Types.ObjectId[];
+		if(possibleSuggestions.length <= 5){
+			queryArray = possibleSuggestions;
+		}else{
+			possibleSuggestions.sort(() => Math.random() - 0.5);
+			queryArray = possibleSuggestions.slice(0, 5);
+		}
+
+		suggestions = await User.find({$in : queryArray});
+
+	}
+		return res.status(statusCodes.OK).json({
+			success : true,
+			message : "Here are some follow suggestions.",
+			followSuggestions : suggestions
+		})
+})
