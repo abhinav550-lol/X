@@ -1,0 +1,19 @@
+ Favicon : 
+link : https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/X_logo.jpg/900px-X_logo.jpg
+
+
+
+
+Obj:
+Unprotected Routes
+	Login 
+	SignUp
+	A Loading Page with X, whenever reload
+
+Protect Routes 
+	Home -> has for you , suggestions , sidebar , infinite scroll page
+	View a tweet and its comments
+	-PostComponent
+	-NotificationComponent
+	-SearchComponent
+

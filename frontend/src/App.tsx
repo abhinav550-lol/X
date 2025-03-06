@@ -1,33 +1,41 @@
+import { BrowserRouter, Route, Routes } from 'react-router'
+import './App.css'
+import LoadingScreen from './components/LoadingScreen'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import ProtectedRoute from './components/ProtectedRoute'
+import { config } from './config'
 
-function App() {
-	//const [user, setUser] = useState(null);
 
-	//const getUser = async () => {
-	//	try {
-	//		const url = `http://localhost:3000/auth/login/success`;
-	//		const { data } = await axios.get(url, { withCredentials: true });
-	//		setUser(data.user._json);
-	//		console.log(user)
-	//		console.log(data.user._json)
-	//	} catch (err) {
-	//		console.log(err);
-	//	}
-	//};
+export default function App(){
+	const [isAuthenticated , setIsAuthenticated] = useState(false);
+	const [loadingScreenShown , setLoadingScreenShown] = useState(false);
+	useEffect(() => {
+		setLoadingScreenShown((e) => !e)
+		async function isUserAuthenticated(){
+			try{
+				const response = await axios.get(`${config.BACKEND_URI}/auth/user` , {withCredentials : true});	
+				setIsAuthenticated((() =>  response.data.success));
+			}catch(err){
+				setIsAuthenticated(false);
+			}
+		}
+		isUserAuthenticated();
+	})
 
-	//useEffect(() => {
-	//	getUser();
-		
-	//}, []);
+	return (	
+		<BrowserRouter >
+		{!loadingScreenShown && <LoadingScreen />}
+		<Routes>
+			{/*Unprotected Routes*/}
 
-	function handleClick(){
-		window.open( "http://localhost:3000/auth/login/google" , "_blank");
-	}
-	return (
-		<div>
 
-			<button onClick={handleClick}>Google SignIn</button>
-		</div>
-	)
+			{/*Protected Routes*/}
+			<Route element={<ProtectedRoute isAuth={isAuthenticated}/>}>   
+				<Route path='/home' ></Route>
+
+			</Route>
+		</Routes>
+		</BrowserRouter>
+	)	
 }
-
-export default App
